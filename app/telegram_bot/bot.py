@@ -8,8 +8,7 @@ from aiogram.types import Message, BotCommand
 from aiogram.filters import CommandStart, Command
 
 import bot_config
-from telegram_bot.module_1 import func_1
-from telegram_bot.module_2 import func_2
+from telegram_bot.logging_settings import logging_config
 
 # TODO logger = logging.getLogger(__name__)
 BOT_TOKEN = bot_config.BOT_TOKEN
@@ -47,17 +46,17 @@ async def handle_start(message: Message):
 
 
 async def main():
-    logging.basicConfig(
-        format="#%(levelname)-8s %(name)s:%(funcName)s - %(message)s -- this is root"
-    )
-    print("hello")
-    logging.warning("main_warning")
-    func_1()
-    func_2()
-    print("bye")
-    # await set_main_menu(bot)
-    # await dp.start_polling(bot)
+    # TODO перенести конфиг в main
+    logging.config.dictConfig(logging_config)
+    bot = Bot(token=BOT_TOKEN)
+    await set_main_menu(bot)
+    await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+
+# TODO залогировать что-то в проекте
+# TODO поправить структуру
+# TODO sentry
