@@ -2,6 +2,7 @@ import asyncio
 import logging
 import logging.config
 
+import yaml
 from aiogram import Bot
 from aiogram import Dispatcher
 from aiogram.types import Message, BotCommand
@@ -10,7 +11,7 @@ from aiogram.filters import CommandStart, Command
 import bot_config
 from telegram_bot.logging_settings import logging_config
 
-# TODO logger = logging.getLogger(__name__)
+# FIXME logger = logging.getLogger(__name__)
 BOT_TOKEN = bot_config.BOT_TOKEN
 dp = Dispatcher()
 
@@ -45,8 +46,13 @@ async def handle_start(message: Message):
     await message.answer(text=f"Hello, {message.from_user.full_name}!")
 
 
+# TODO выбрать или yaml или словарь
+# with open('logging_config.yaml', 'rt') as f:
+#     config = yaml.safe_load(f.read())
+
+
 async def main():
-    # TODO перенести конфиг в main
+    # FIXME перенести конфиг в main
     logging.config.dictConfig(logging_config)
     bot = Bot(token=BOT_TOKEN)
     await set_main_menu(bot)
@@ -57,6 +63,6 @@ if __name__ == "__main__":
     asyncio.run(main())
 
 
-# TODO залогировать что-то в проекте
-# TODO поправить структуру
-# TODO sentry
+# TODO ЛОГИ -- залогировать что-то в проекте
+# TODO ЛОГИ -- поправить структуру
+# TODO ЛОГИ -- sentry
