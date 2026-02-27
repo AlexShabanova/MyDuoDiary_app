@@ -1,18 +1,23 @@
-import asyncio
+import os
+import dotenv
+import yaml
+
 import logging
 import logging.config
+from telegram_bot.logging_settings import logging_config
 
-import yaml
+import asyncio
 from aiogram import Bot
 from aiogram import Dispatcher
 from aiogram.types import Message, BotCommand
 from aiogram.filters import CommandStart, Command
 
 import bot_config
-from telegram_bot.logging_settings import logging_config
 
 # FIXME logger = logging.getLogger(__name__)
-BOT_TOKEN = bot_config.BOT_TOKEN
+# BOT_TOKEN = bot_config.BOT_TOKEN
+dotenv.load_dotenv("..")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 dp = Dispatcher()
 
 menu_commands: dict[str, str] = {
