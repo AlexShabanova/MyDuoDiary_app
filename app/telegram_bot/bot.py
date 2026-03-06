@@ -5,6 +5,9 @@ from aiogram import Bot, Dispatcher
 from handlers import other, user
 from telegram_bot.bot_config import BotConfig, load_bot_config
 
+# Инициализируем логгер
+logger = logging.getLogger(__name__)
+
 
 # Функция конфигурирования и запуска бота
 async def main():
