@@ -2,6 +2,9 @@ import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
+
 from handlers import other, user
 from telegram_bot.bot_config import BotConfig, load_bot_config
 
@@ -24,7 +27,10 @@ async def main():
         format=config.log.format,
     )
     # Инициализируем бот и диспетчер
-    bot = Bot(token=config.bot.token)
+    bot = Bot(
+        token=config.bot.token,
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+    )
     dp = Dispatcher()
 
     # Регистриуем роутеры в диспетчере
