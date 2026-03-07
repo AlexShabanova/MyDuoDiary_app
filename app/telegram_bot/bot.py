@@ -34,8 +34,8 @@ async def main():
     dp = Dispatcher()
 
     # Регистриуем роутеры в диспетчере
-    dp.include_router(user.router)
-    dp.include_router(other.router)
+    dp.include_router(user.user_router)
+    dp.include_router(other.other_router)
 
     # Пропускаем накопившиеся апдейты и запускаем polling
     await bot.delete_webhook(drop_pending_updates=True)
@@ -47,3 +47,4 @@ asyncio.run(main())
 # TODO ЛОГИ -- залогировать что-то в проекте
 # TODO ЛОГИ -- поправить структуру
 # TODO ЛОГИ -- sentry
+# TODO ЛОГИ -- fluentogram
