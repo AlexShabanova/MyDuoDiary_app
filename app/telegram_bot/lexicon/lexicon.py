@@ -4,7 +4,12 @@ LEXICON_RU: dict[str, str] = {
     "открыть словарь или отправить команду /help",
     "/help": "Я перевожу слова, которые вы не знаете",
     "no_post": "Данный функционал не поддерживается:(",
-    "post": "write a post",
+    "post": "Еще не сделано:(",
     "jisho_dict": "open jisho dictionary",
     "tanoshii_dict": "open tanoshii dictionary",
+}
+
+LEXICON_COMMANDS_RU: dict[str, str] = {
+    "/start": "Restart bot",
+    "/help": "Get help info",
 }

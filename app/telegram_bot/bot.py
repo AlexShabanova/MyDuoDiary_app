@@ -7,6 +7,7 @@ from aiogram.enums import ParseMode
 
 from handlers import other, user
 from telegram_bot.bot_config import BotConfig, load_bot_config
+from telegram_bot.keyboards import set_main_menu
 
 # Инициализируем логгер
 logger = logging.getLogger(__name__)
@@ -32,6 +33,9 @@ async def main():
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
     dp = Dispatcher()
+
+    # Настраиваем кнопку Menu
+    await set_main_menu(bot)
 
     # Регистриуем роутеры в диспетчере
     dp.include_router(user.user_router)
