@@ -1,6 +1,6 @@
 __all__ = (
-    "LEXICON_RU",
-    "LEXICON_COMMANDS_RU",
+    "LEXICON",
+    "LEXICON_COMMANDS",
 )
 
-from .lexicon import LEXICON_RU, LEXICON_COMMANDS_RU
+from .lexicon import LEXICON, LEXICON_COMMANDS

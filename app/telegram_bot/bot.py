@@ -4,6 +4,7 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
+from aiogram.fsm.storage.memory import MemoryStorage
 
 from handlers import other, user
 from telegram_bot.bot_config import BotConfig, load_bot_config
@@ -27,9 +28,13 @@ async def main():
         level=logging.getLevelName(level=config.log.level),
         format=config.log.format,
     )
+    # Инициализируем хранилище (создаем экземпляр класса MemoryStorage)
+    storage = MemoryStorage()
+
     # Инициализируем бот и диспетчер
     bot = Bot(
         token=config.bot.token,
+        storage=storage,
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
     dp = Dispatcher()
@@ -52,3 +57,4 @@ asyncio.run(main())
 # TODO ЛОГИ -- поправить структуру
 # TODO ЛОГИ -- sentry
 # TODO ЛОГИ -- fluentogram
+# TODO ЛОГИ -- генераторы клавиатур

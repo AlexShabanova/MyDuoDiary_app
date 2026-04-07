@@ -1,4 +1,4 @@
-__all__ = ("keyboard", "set_main_menu")
+__all__ = ("reply_keyboard", "set_main_menu")
 
-from .keyboards import keyboard
+from .reply_keyboards import reply_keyboard
 from .set_menu import set_main_menu

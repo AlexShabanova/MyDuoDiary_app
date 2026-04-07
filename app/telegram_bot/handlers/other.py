@@ -1,6 +1,6 @@
 from aiogram import Router
 from aiogram.types import Message
-from telegram_bot.lexicon.lexicon import LEXICON_RU
+from telegram_bot.lexicon.lexicon import LEXICON
 
 # Инициализируем роутер уровня модуля
 other_router = Router()
@@ -13,4 +13,4 @@ async def send_echo(message: Message):
     try:
         await message.send_copy(chat_id=message.chat.id)
     except TypeError:
-        await message.reply(text=LEXICON_RU["no_post"])
+        await message.reply(text=LEXICON["no_post"])
