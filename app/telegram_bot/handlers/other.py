@@ -1,5 +1,7 @@
 from aiogram import Router
 from aiogram.types import Message
+
+from telegram_bot.keyboards.inline_keyboards import inline_keyboard
 from telegram_bot.lexicon.lexicon import LEXICON
 
 # Инициализируем роутер уровня модуля
@@ -10,7 +12,7 @@ other_router = Router()
 # кроме команд "/start" и "/help"
 @other_router.message()
 async def send_echo(message: Message):
-    try:
-        await message.send_copy(chat_id=message.chat.id)
-    except TypeError:
-        await message.reply(text=LEXICON["no_post"])
+    await message.reply(
+        text=LEXICON["no_post"],
+        reply_markup=inline_keyboard,
+    )

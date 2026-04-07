@@ -51,9 +51,8 @@ async def process_cancel_command(message: Message):
 @user_router.message(Command(commands="cancel"), ~StateFilter(default_state))
 async def process_cancel_command_state(message: Message, state: FSMContext):
     await message.answer(
-        text="Вы вышли из машины состояний\n\n"
-        "Чтобы снова перейти к заполнению анкеты - "
-        "отправьте команду /post"
+        text="Вы вышли из машины состояний",
+        reply_markup=inline_keyboard,
     )
     # Сбрасываем состояние и очищаем данные, полученные внутри состояний
     await state.clear()
@@ -80,7 +79,6 @@ async def process_post_sent(message: Message, state: FSMContext):
     # Сохраняем пост в хранилище по ключу "post"
     await state.update_data(post=message.text)
     await message.answer(text="Переводим пост...")
-    # FIXME или это состояние не нужно
     # Устанавливаем состояние ожидания перевода
     await state.set_state(FSMTranslatePost.translate_state)
 
@@ -92,7 +90,10 @@ async def process_post_sent(message: Message, state: FSMContext):
     # Сбрасываем состояние и очищаем данные, полученные внутри состояний
     await state.clear()
     # Отправляем в чат сообщение о выходе из машины состояний
-    await message.answer(text="Крутой пост!\n\n" "Вы вышли из машины состояний")
+    await message.answer(
+        text="Крутой пост!\n\n" "Вы вышли из машины состояний",
+        reply_markup=inline_keyboard,
+    )
 
 
 # Этот хэндлер будет срабатывать, если во время ввода поста
