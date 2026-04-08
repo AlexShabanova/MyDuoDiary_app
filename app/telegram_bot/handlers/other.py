@@ -14,5 +14,5 @@ other_router = Router()
 async def send_echo(message: Message):
     await message.reply(
         text=LEXICON["no_post"],
-        reply_markup=inline_keyboard,
+        # reply_markup=inline_keyboard,
     )
