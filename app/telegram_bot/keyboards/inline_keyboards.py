@@ -1,4 +1,4 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from telegram_bot.lexicon import LEXICON
@@ -11,8 +11,24 @@ post_button = InlineKeyboardButton(
     text=LEXICON["post"], callback_data="post_button_click"
 )
 
+jisho_web_app_btn: InlineKeyboardButton = InlineKeyboardButton(
+    text=LEXICON["jisho_dict"], web_app=WebAppInfo(url="https://jisho.org/")
+)
+tanoshii_web_app_btn: InlineKeyboardButton = InlineKeyboardButton(
+    text=LEXICON["tanoshii_dict"],
+    web_app=WebAppInfo(url="https://www.tanoshiijapanese.com/dictionary/"),
+)
+
+buttons: list = [
+    post_button,
+    jisho_web_app_btn,
+    tanoshii_web_app_btn,
+]
+
+
 # Распаковываем список с кнопками в билдер методом `row` c параметром `width`
-kb_builder.row(post_button)
+kb_builder.row(*buttons)
+kb_builder.adjust(1, 2)
 
 # Возвращаем объект инлайн-клавиатуры
 inline_keyboard: InlineKeyboardMarkup = kb_builder.as_markup()
