@@ -9,8 +9,5 @@ other_router = Router()
 # Этот хэндлер будет срабатывать на любые ваши сообщения,
 # кроме команд "/start" и "/help"
 @other_router.message()
-async def send_echo(message: Message):
-    try:
-        await message.send_copy(chat_id=message.chat.id)
-    except TypeError:
-        await message.reply(text=LEXICON["no_post"])
+async def process_other_command(message: Message):
+    await message.reply(text=LEXICON["no_post"])
