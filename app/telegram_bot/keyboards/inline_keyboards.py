@@ -32,3 +32,26 @@ kb_builder.adjust(1, 2)
 
 # Возвращаем объект инлайн-клавиатуры
 inline_keyboard: InlineKeyboardMarkup = kb_builder.as_markup()
+
+
+# Инициализируем билдер
+kb_cancel_builder = InlineKeyboardBuilder()
+
+# Создаем объекты инлайн-кнопок
+cancel_button = InlineKeyboardButton(text="cancel", callback_data="cancel_button_click")
+save_button = InlineKeyboardButton(
+    text="save a post", callback_data="save_button_click"
+)
+
+buttons: list = [
+    save_button,
+    cancel_button,
+]
+
+
+# Распаковываем список с кнопками в билдер методом `row` c параметром `width`
+kb_cancel_builder.row(*buttons)
+# kb_builder.adjust(1, 2)
+
+# Возвращаем объект инлайн-клавиатуры
+inline_cancel_keyboard: InlineKeyboardMarkup = kb_cancel_builder.as_markup()
