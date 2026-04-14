@@ -5,6 +5,7 @@ from telegram_bot.lexicon.lexicon import LEXICON
 # Инициализируем роутер уровня модуля
 other_router = Router()
 
+
 # Этот хэндлер будет срабатывать на любые ваши сообщения,
 # кроме команд "/start" и "/help"
 @other_router.message()
