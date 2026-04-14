@@ -3,7 +3,7 @@ LEXICON: dict[str, str] = {
     "Можете написать пост о том, как прошел ваш день,\n"
     "открыть словарь или отправить команду /help",
     "/help": "Я перевожу слова, которые вы не знаете",
-    "no_post": "Данный функционал не поддерживается:(",
+    "no_post": "Нажмите на кнопку",
     "post": "write a post",
     "jisho_dict": "open jisho dictionary",
     "tanoshii_dict": "open tanoshii dictionary",
