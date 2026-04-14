@@ -6,8 +6,10 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from aiogram.types import (
     Message,
+    CallbackQuery,
 )
 
+from telegram_bot.keyboards.inline_keyboards import inline_keyboard
 from telegram_bot.keyboards import reply_keyboard
 from telegram_bot.lexicon.lexicon import LEXICON
 from telegram_bot.states.states import FSMTranslatePost
@@ -22,7 +24,7 @@ user_router = Router()
 async def process_start_command(message: Message):
     await message.answer(
         text=LEXICON["/start"],
-        reply_markup=reply_keyboard,
+        reply_markup=inline_keyboard,
     )
 
 
@@ -31,9 +33,8 @@ async def process_start_command(message: Message):
 @user_router.message(Command(commands="cancel"), StateFilter(default_state))
 async def process_cancel_command(message: Message):
     await message.answer(
-        text="Отменять нечего. Вы вне машины состояний\n\n"
-        "Чтобы перейти к заполнению анкеты - "
-        "отправьте команду /post"
+        text="Отменять нечего. Вы вне машины состояний\n\n",
+        reply_markup=inline_keyboard,
     )
 
 
@@ -42,8 +43,8 @@ async def process_cancel_command(message: Message):
 @user_router.message(Command(commands="cancel"), ~StateFilter(default_state))
 async def process_cancel_command_state(message: Message, state: FSMContext):
     await message.answer(
-        text="Вы вышли из машины состояний",
-        reply_markup=reply_keyboard,
+        text="Вы вышли из машины состояний\n\n",
+        reply_markup=inline_keyboard,
     )
     # Сбрасываем состояние и очищаем данные, полученные внутри состояний
     await state.clear()
@@ -51,14 +52,21 @@ async def process_cancel_command_state(message: Message, state: FSMContext):
 
 # Этот хэндлер будет срабатывать на нажатие кнопки post
 # и переводить бота в состояние ожидания ввода имени
-@user_router.message(F.text == LEXICON["post"], StateFilter(default_state))
-async def process_post_command(message: Message, state: FSMContext):
-    await message.answer(text="Write a post, put unfamiliar words in ()")
+@user_router.callback_query(F.data == "post_button_click", StateFilter(default_state))
+async def process_post_command(callback: CallbackQuery, state: FSMContext):
+    # await callback.message.answer(text="Write a post, put unfamiliar words in ()")
+    # await callback.answer(text="Write a post, put unfamiliar words in ()")
+
+    sent_msg = await callback.message.edit_text(
+        text="Write a post, put unfamiliar words in ()"
+    )
+
     # Устанавливаем состояние ожидания написания поста
     await state.set_state(FSMTranslatePost.post_state)
-    # Удаляем кнопку,
-    # чтобы у пользователя не было желания тыкать кнопки
-    await message.edit_reply_markup(reply_markup=None)
+    # await sent_msg.delete()
+    # # Удаляем кнопку,
+    # # чтобы у пользователя не было желания тыкать кнопки
+    # await callback.message.edit_reply_markup(reply_markup=None)
 
 
 # Этот хэндлер будет срабатывать, если написан корректный пост
@@ -69,22 +77,30 @@ async def process_post_command(message: Message, state: FSMContext):
 async def process_post_sent(message: Message, state: FSMContext):
     # Сохраняем пост в хранилище по ключу "post"
     await state.update_data(post=message.text)
-    await message.answer(text="Переводим пост...")
+
+    # sent_msg = await message.answer(text="Переводим пост...")
+
     # Устанавливаем состояние ожидания перевода
     await state.set_state(FSMTranslatePost.translate_state)
 
     translated_text = message.text.upper()
     await state.update_data(translated_post=translated_text)
 
-    await message.reply(text=translated_text)
+    # # удаляем предыдущее сообщение перед отправкой нового
+    # await sent_msg.delete()
+
+    await message.reply(
+        text=translated_text,
+        reply_markup=inline_keyboard,
+    )
 
     # Сбрасываем состояние и очищаем данные, полученные внутри состояний
     await state.clear()
-    # Отправляем в чат сообщение о выходе из машины состояний
-    await message.answer(
-        text="Крутой пост!\n\n" "Вы вышли из машины состояний",
-        reply_markup=reply_keyboard,
-    )
+    # # Отправляем в чат сообщение о выходе из машины состояний
+    # await message.answer(
+    #     text="Крутой пост!\n\n" "Вы вышли из машины состояний",
+    #     reply_markup=inline_keyboard,
+    # )
 
 
 # Этот хэндлер будет срабатывать, если во время ввода поста
@@ -99,12 +115,16 @@ async def warning_no_words_to_translate(message: Message):
         "Если вы хотите прервать написание поста - "
         "отправьте команду /cancel"
     )
+    # TODO две кнопки: сохранить пост и отмена
 
 
 # Этот хэндлер срабатывает на команду /help
 @user_router.message(Command(commands="help"), StateFilter(default_state))
 async def process_help_command(message: Message):
-    await message.answer(text=LEXICON["/help"])
+    await message.answer(
+        text=LEXICON["/help"],
+        reply_markup=inline_keyboard,
+    )
 
 
 # Этот хэндлер будет срабатывать на команду "open jisho dictionary"
@@ -116,7 +136,7 @@ async def process_help_command(message: Message):
 async def process_web_app_command(message: Message):
     await message.answer(
         text="jisho dictionary",
-        reply_markup=reply_keyboard,
+        reply_markup=inline_keyboard,
     )
 
 
@@ -129,7 +149,7 @@ async def process_web_app_command(message: Message):
 async def process_web_app_command(message: Message):
     await message.answer(
         text="tanoshii dictionary",
-        reply_markup=reply_keyboard,
+        reply_markup=inline_keyboard,
     )
 
 
