@@ -3,7 +3,6 @@ import logging
 from aiogram import Router, F
 from aiogram.filters import Command, CommandStart, StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import default_state
 from aiogram.types import (
     Message,
     CallbackQuery,
@@ -21,7 +20,7 @@ user_router = Router()
 
 
 # Этот хэндлер срабатывает на команду /start
-@user_router.message(CommandStart(), StateFilter(default_state))
+@user_router.message(CommandStart(), StateFilter(None))
 async def process_start_command(message: Message):
     await message.answer(
         text=LEXICON["/start"],
@@ -29,29 +28,17 @@ async def process_start_command(message: Message):
     )
 
 
-# Этот хэндлер будет срабатывать на команду "/cancel" в состоянии
-# по умолчанию и сообщать, что эта команда работает внутри машины состояний
-# FIXME этот хендлер нужен?
-@user_router.message(Command(commands="cancel"), StateFilter(default_state))
-async def process_cancel_command(message: Message):
-    sent_msg = await message.answer(
-        text="Отменять нечего. Вы вне машины состояний\n\n",
-        # reply_markup=inline_keyboard,
-    )
-    await sent_msg.delete()
-
-
 # Этот хэндлер будет срабатывать на нажатие кнопки post
 # и переводить бота в состояние ожидания ввода имени
-@user_router.callback_query(F.data == "post_button_click", StateFilter(default_state))
+@user_router.callback_query(F.data == "post_button_click", StateFilter(None))
 async def process_post_command(callback: CallbackQuery, state: FSMContext):
-    await callback.message.answer(text="Write a post, put unfamiliar words in ()")
-
+    msg = await callback.message.edit_text(
+        text="Write a post, put unfamiliar words in ()"
+    )
+    # сохраняем сообщение-подсказку, чтобы потом его удалить
+    await state.update_data(last_message=msg)
     # Устанавливаем состояние ожидания написания поста
     await state.set_state(FSMTranslatePost.post_state)
-    # Удаляем кнопку,
-    # чтобы у пользователя не было желания тыкать кнопки
-    await callback.message.edit_reply_markup(reply_markup=None)
 
 
 # Этот хэндлер будет срабатывать, если написан корректный пост
@@ -60,23 +47,29 @@ async def process_post_command(callback: CallbackQuery, state: FSMContext):
     StateFilter(FSMTranslatePost.post_state), lambda x: "(" in x.text and ")" in x.text
 )
 async def process_post_sent(message: Message, state: FSMContext):
+    #  удаляем предыдущее сообщение-подсказку от бота
+    last_message = await state.get_value("last_message")
+    await last_message.delete()
+
     # Сохраняем пост в хранилище по ключу "post"
     await state.update_data(post=message.text)
-
     # Устанавливаем состояние ожидания перевода
     await state.set_state(FSMTranslatePost.translate_state)
     translated_text = message.text.upper()
     await state.update_data(translated_post=translated_text)
-    await message.reply(
-        text=translated_text,
-        reply_markup=inline_keyboard,
-    )
+
+    await message.reply(text=translated_text)
+    await message.answer(text="Отлично! Пост сохранен", reply_markup=inline_keyboard)
     # Сбрасываем состояние и очищаем данные, полученные внутри состояний
     await state.clear()
 
 
 @user_router.message(StateFilter(FSMTranslatePost.post_state))
-async def warning_no_words_to_translate(message: Message):
+async def warning_no_words_to_translate(message: Message, state: FSMContext):
+    #  удаляем предыдущее сообщение-подсказку от бота
+    last_message = await state.get_value("last_message")
+    await last_message.delete()
+
     await message.answer(
         text="В посте не найдены слова, которые нужно перевести\n\n"
         "Пожалуйста, пишите неизвестные слова в () или сохраните пост",
@@ -97,9 +90,7 @@ async def warning_no_words_to_translate(message: Message):
 
 # Этот хэндлер будет срабатывать на команду "/cancel" в любых состояниях,
 # кроме состояния по умолчанию, и отключать машину состояний
-@user_router.callback_query(
-    F.data == "cancel_button_click", ~StateFilter(default_state)
-)
+@user_router.callback_query(F.data == "cancel_button_click", ~StateFilter(None))
 async def process_cancel_command_state(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text(
         text="Вы вышли из машины состояний\n\n",
@@ -122,7 +113,7 @@ async def process_save_command_state(callback: CallbackQuery, state: FSMContext)
 
 
 # Этот хэндлер срабатывает на команду /help
-@user_router.message(Command(commands="help"), StateFilter(default_state))
+@user_router.message(Command(commands="help"), StateFilter(None))
 async def process_help_command(message: Message):
     await message.answer(
         text=LEXICON["/help"],
@@ -134,7 +125,7 @@ async def process_help_command(message: Message):
 @user_router.message(
     Command(commands="web_app"),
     F.text == LEXICON["jisho_dict"],
-    StateFilter(default_state),
+    StateFilter(None),
 )
 async def process_web_app_command(message: Message):
     await message.answer(
@@ -147,7 +138,7 @@ async def process_web_app_command(message: Message):
 @user_router.message(
     Command(commands="web_app"),
     F.text == LEXICON["tanoshii_dict"],
-    StateFilter(default_state),
+    StateFilter(None),
 )
 async def process_web_app_command(message: Message):
     await message.answer(
