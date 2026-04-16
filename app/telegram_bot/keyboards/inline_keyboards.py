@@ -38,9 +38,11 @@ inline_keyboard: InlineKeyboardMarkup = kb_builder.as_markup()
 kb_cancel_builder = InlineKeyboardBuilder()
 
 # Создаем объекты инлайн-кнопок
-cancel_button = InlineKeyboardButton(text="cancel", callback_data="cancel_button_click")
+cancel_button = InlineKeyboardButton(
+    text="cancel ❌", callback_data="cancel_button_click"
+)
 save_button = InlineKeyboardButton(
-    text="save a post", callback_data="save_button_click"
+    text="save post 📩", callback_data="save_button_click"
 )
 
 buttons: list = [
