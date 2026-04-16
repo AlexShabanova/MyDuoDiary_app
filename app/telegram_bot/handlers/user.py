@@ -14,114 +14,114 @@ from telegram_bot.keyboards.inline_keyboards import (
 )
 from telegram_bot.lexicon.lexicon import LEXICON
 from telegram_bot.states.states import FSMTranslatePost
+from telegram_bot.utils import auto_delete_history
 
 logger = logging.getLogger(__name__)
 user_router = Router()
 
 
-# Этот хэндлер срабатывает на команду /start
+# start command handler
 @user_router.message(CommandStart(), StateFilter(None))
-async def process_start_command(message: Message):
-    await message.answer(
+@auto_delete_history
+async def process_start_command(message: Message, state: FSMContext):
+    msg: Message = await message.answer(
         text=LEXICON["/start"],
         reply_markup=inline_keyboard,
     )
+    await state.update_data(messages_to_delete=[])
+    return msg
 
 
-# Этот хэндлер будет срабатывать на нажатие кнопки post
-# и переводить бота в состояние ожидания ввода имени
+# if user pressed "write a post" button
 @user_router.callback_query(F.data == "post_button_click", StateFilter(None))
+@auto_delete_history
 async def process_post_command(callback: CallbackQuery, state: FSMContext):
-    msg = await callback.message.edit_text(
-        text="Write a post, put unfamiliar words in ()"
-    )
-    # сохраняем сообщение-подсказку, чтобы потом его удалить
-    await state.update_data(last_message=msg)
-    # Устанавливаем состояние ожидания написания поста
+    try:
+        msg: CallbackQuery = await callback.message.edit_text(text=LEXICON["brackets"])
+    except:
+        # TODO сделать свой exception
+        msg: Message = await callback.message.answer(text=LEXICON["brackets"])
     await state.set_state(FSMTranslatePost.post_state)
+    return msg
 
 
-# Этот хэндлер будет срабатывать, если написан корректный пост
-# и переводить в состояние ожидания перевода
+# handler for correct post
 @user_router.message(
     StateFilter(FSMTranslatePost.post_state), lambda x: "(" in x.text and ")" in x.text
 )
+@auto_delete_history
 async def process_post_sent(message: Message, state: FSMContext):
-    #  удаляем предыдущее сообщение-подсказку от бота
-    last_message = await state.get_value("last_message")
-    await last_message.delete()
-
-    # Сохраняем пост в хранилище по ключу "post"
     await state.update_data(post=message.text)
-    # Устанавливаем состояние ожидания перевода
     await state.set_state(FSMTranslatePost.translate_state)
-    translated_text = message.text.upper()
+    # FIXME тут должен быть перевод
+    translated_text: str = message.text.upper()
     await state.update_data(translated_post=translated_text)
 
     await message.reply(text=translated_text)
-    await message.answer(text="Отлично! Пост сохранен", reply_markup=inline_keyboard)
-    # Сбрасываем состояние и очищаем данные, полученные внутри состояний
     await state.clear()
 
+    return await message.answer(text=LEXICON["saved"], reply_markup=inline_keyboard)
 
+
+# handler for a post with no unfamiliar words
 @user_router.message(StateFilter(FSMTranslatePost.post_state))
+@auto_delete_history
 async def warning_no_words_to_translate(message: Message, state: FSMContext):
-    #  удаляем предыдущее сообщение-подсказку от бота
-    last_message = await state.get_value("last_message")
-    await last_message.delete()
-
-    await message.answer(
-        text="В посте не найдены слова, которые нужно перевести\n\n"
-        "Пожалуйста, пишите неизвестные слова в () или сохраните пост",
+    return await message.answer(
+        text=LEXICON["no_words"],
         reply_markup=inline_cancel_keyboard,
     )
 
 
-# Этот хэндлер будет срабатывать, если во время ввода поста
-# будет введено что-то некорректное
-@user_router.message(StateFilter(FSMTranslatePost.post_state))
-async def warning_no_words_to_translate(message: Message):
-    await message.answer(
-        text="В посте не найдены слова, которые нужно перевести\n\n"
-        "Пожалуйста, пишите неизвестные слова в () или сохраните пост",
-        reply_markup=inline_cancel_keyboard,
-    )
-
-
-# Этот хэндлер будет срабатывать на команду "/cancel" в любых состояниях,
-# кроме состояния по умолчанию, и отключать машину состояний
+# handler for "cancel" button
 @user_router.callback_query(F.data == "cancel_button_click", ~StateFilter(None))
+@auto_delete_history
 async def process_cancel_command_state(callback: CallbackQuery, state: FSMContext):
-    await callback.message.edit_text(
-        text="Вы вышли из машины состояний\n\n",
-        reply_markup=inline_keyboard,
-    )
-    # Сбрасываем состояние и очищаем данные, полученные внутри состояний
+    try:
+        msg = await callback.message.edit_text(
+            text=LEXICON["exit"],
+            reply_markup=inline_keyboard,
+        )
+    except:
+        # TODO сделать свой exception
+        msg = await callback.message.answer(
+            text=LEXICON["exit"],
+            reply_markup=inline_keyboard,
+        )
     await state.clear()
+    return msg
 
 
-@user_router.callback_query(
-    F.data == "save_button_click", StateFilter(FSMTranslatePost.post_state)
-)
+# handler for "save post" button
+@user_router.callback_query(F.data == "save_button_click", ~StateFilter(None))
+@auto_delete_history
 async def process_save_command_state(callback: CallbackQuery, state: FSMContext):
-    await callback.message.edit_text(
-        text="Пост сохранен\n\n",
-        reply_markup=inline_keyboard,
-    )
-    # Сбрасываем состояние и очищаем данные, полученные внутри состояний
+    try:
+        msg = await callback.message.edit_text(
+            text=LEXICON["saved"],
+            reply_markup=inline_keyboard,
+        )
+    except:
+        # TODO сделать свой exception
+        msg = await callback.message.answer(
+            text=LEXICON["saved"],
+            reply_markup=inline_keyboard,
+        )
     await state.clear()
+    return msg
 
 
-# Этот хэндлер срабатывает на команду /help
+# /help handler
 @user_router.message(Command(commands="help"), StateFilter(None))
-async def process_help_command(message: Message):
-    await message.answer(
+@auto_delete_history
+async def process_help_command(message: Message, state: FSMContext):
+    return await message.answer(
         text=LEXICON["/help"],
         reply_markup=inline_keyboard,
     )
 
 
-# Этот хэндлер будет срабатывать на команду "open jisho dictionary"
+# web app jisho dictionary handler
 @user_router.message(
     Command(commands="web_app"),
     F.text == LEXICON["jisho_dict"],
@@ -134,7 +134,7 @@ async def process_web_app_command(message: Message):
     )
 
 
-# Этот хэндлер будет срабатывать на команду "open tanoshii dictionary"
+# web app tanoshii dictionary handler
 @user_router.message(
     Command(commands="web_app"),
     F.text == LEXICON["tanoshii_dict"],
@@ -145,3 +145,11 @@ async def process_web_app_command(message: Message):
         text="tanoshii dictionary",
         reply_markup=inline_keyboard,
     )
+
+
+# if user instead of clicking a button is trying to input text
+@user_router.message(StateFilter(None))
+@user_router.message(F.text, StateFilter(FSMTranslatePost.post_state))
+@auto_delete_history
+async def warning_no_button_pressed(message: Message, state: FSMContext):
+    return await message.answer(text=LEXICON["no_post"], reply_markup=inline_keyboard)
