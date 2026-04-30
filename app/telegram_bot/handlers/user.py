@@ -8,6 +8,7 @@ from aiogram.types import (
     CallbackQuery,
 )
 
+from telegram_bot.exceptions.message_exceptions import NoMessageToEditException
 from telegram_bot.keyboards.inline_keyboards import (
     inline_keyboard,
     inline_cancel_keyboard,
@@ -38,8 +39,7 @@ async def process_start_command(message: Message, state: FSMContext):
 async def process_post_command(callback: CallbackQuery, state: FSMContext):
     try:
         msg: CallbackQuery = await callback.message.edit_text(text=LEXICON["brackets"])
-    except:
-        # TODO сделать свой exception
+    except NoMessageToEditException:
         msg: Message = await callback.message.answer(text=LEXICON["brackets"])
     await state.set_state(FSMTranslatePost.post_state)
     return msg
@@ -82,8 +82,7 @@ async def process_cancel_command_state(callback: CallbackQuery, state: FSMContex
             text=LEXICON["exit"],
             reply_markup=inline_keyboard,
         )
-    except:
-        # TODO сделать свой exception
+    except NoMessageToEditException:
         msg = await callback.message.answer(
             text=LEXICON["exit"],
             reply_markup=inline_keyboard,
@@ -101,8 +100,7 @@ async def process_save_command_state(callback: CallbackQuery, state: FSMContext)
             text=LEXICON["saved"],
             reply_markup=inline_keyboard,
         )
-    except:
-        # TODO сделать свой exception
+    except NoMessageToEditException:
         msg = await callback.message.answer(
             text=LEXICON["saved"],
             reply_markup=inline_keyboard,

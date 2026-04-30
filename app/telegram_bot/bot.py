@@ -41,7 +41,7 @@ async def main():
 asyncio.run(main())
 
 # TODO ЛОГИ -- залогировать что-то в проекте
-# TODO ЛОГИ -- поправить структуру
+# TODO -- поправить структуру
 # TODO ЛОГИ -- sentry
-# TODO ЛОГИ -- fluentogram
-# TODO ЛОГИ -- генераторы клавиатур
+# TODO -- fluentogram
+# TODO -- генераторы клавиатур

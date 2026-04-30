@@ -53,7 +53,6 @@ buttons: list = [
 
 # Распаковываем список с кнопками в билдер методом `row` c параметром `width`
 kb_cancel_builder.row(*buttons)
-# kb_builder.adjust(1, 2)
 
 # Возвращаем объект инлайн-клавиатуры
 inline_cancel_keyboard: InlineKeyboardMarkup = kb_cancel_builder.as_markup()
