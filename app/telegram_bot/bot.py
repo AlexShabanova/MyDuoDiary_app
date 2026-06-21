@@ -6,7 +6,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
-from handlers import user
+from telegram_bot.handlers import user
 from telegram_bot.bot_config import BotConfig, load_bot_config
 from telegram_bot.keyboards import set_main_menu
 
