@@ -1,0 +1,2 @@
+class NoMessageToEditException(Exception):
+    pass
