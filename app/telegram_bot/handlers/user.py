@@ -38,7 +38,7 @@ async def process_start_command(message: Message, state: FSMContext):
 @auto_delete_history
 async def process_post_command(callback: CallbackQuery, state: FSMContext):
     try:
-        msg: CallbackQuery = await callback.message.edit_text(text=LEXICON["brackets"])
+        msg: CallbackQuery = await callback.message.answer(text=LEXICON["brackets"])
     except NoMessageToEditException:
         msg: Message = await callback.message.answer(text=LEXICON["brackets"])
     await state.set_state(FSMTranslatePost.post_state)
@@ -78,7 +78,7 @@ async def warning_no_words_to_translate(message: Message, state: FSMContext):
 @auto_delete_history
 async def process_cancel_command_state(callback: CallbackQuery, state: FSMContext):
     try:
-        msg = await callback.message.edit_text(
+        msg = await callback.message.answer(
             text=LEXICON["exit"],
             reply_markup=inline_keyboard,
         )
@@ -96,7 +96,7 @@ async def process_cancel_command_state(callback: CallbackQuery, state: FSMContex
 @auto_delete_history
 async def process_save_command_state(callback: CallbackQuery, state: FSMContext):
     try:
-        msg = await callback.message.edit_text(
+        msg = await callback.message.answer(
             text=LEXICON["saved"],
             reply_markup=inline_keyboard,
         )
